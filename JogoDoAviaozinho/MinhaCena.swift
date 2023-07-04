@@ -32,7 +32,7 @@ class MinhaCena: SKScene {
             imagemFundo.position = CGPoint(x: self.size.width * CGFloat(i), y: 0)
             imagemFundo.zPosition = -1
 
-            imagemFundo.run(repete)
+            imagemFundo.run(repete)//chama a função
             
             
             self.addChild(imagemFundo)
