@@ -13,6 +13,8 @@ class MinhaViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        AppUtility.lockOrientation(.landscape)
 
         //Temos que criar uma view:SKView para a nossa View Controller.
         let minhaView:SKView = SKView(frame: self.view.frame)
@@ -25,5 +27,18 @@ class MinhaViewController: UIViewController {
         minhaView.showsFPS = true
         minhaView.showsNodeCount = true
         minhaView.showsPhysics = true
+    }
+}
+
+struct AppUtility {
+    static func lockOrientation(_ orientation: UIInterfaceOrientationMask) {
+        if let delegate = UIApplication.shared.delegate as? AppDelegate {
+            delegate.orientationLock = orientation
+        }
+    }
+    
+    static func lockOrientation(_ orientation: UIInterfaceOrientationMask, andRotateTorotateOrientation: UIInterfaceOrientation) {
+        self.lockOrientation(orientation)
+        UIDevice.current.setValue(andRotateTorotateOrientation.rawValue, forKey: "orientation")
     }
 }
