@@ -23,6 +23,10 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
     //MARK: PERSONAGENS
     let felpudo:ObjetoAnimado = ObjetoAnimado("aviao") //invocando class que instância animação
     
+    //MARK: SONS
+    let somPick = SKAction.playSoundFileNamed("PLIN.mp3", waitForCompletion: false)
+    let somHit = SKAction.playSoundFileNamed("QUEBRA.mp3", waitForCompletion: false)
+    
     //MARK: LABELS
     let textoPontos:SKLabelNode = SKLabelNode(fontNamed: "True Crimes")
     let textoGame:SKLabelNode = SKLabelNode(fontNamed: "True Crimes")
@@ -33,11 +37,17 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
     
     let objetoDummy = SKNode() //Dummy é um termo usado para algo que está lá apenas como auxílio.
     var sorteiaItens = SKAction()
+    
+    var inimigos:[ObjetoAnimado] = []
 
     override func didMove(to view: SKView) {
         self.backgroundColor = UIColor.black
         
         self.physicsWorld.contactDelegate = self
+        
+        //Reproduzindo música
+        SKAudio.sharedInstance().backgroundMusicPlayer?.volume = 0.5
+        SKAudio.sharedInstance().playBackgroundMusic("MUSICA.mp3")
         
         //Declarando fundo e métodos de dinâmica de fundo.
         var imagemFundo:SKSpriteNode = SKSpriteNode()
@@ -94,15 +104,19 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
         
         //MARK: INSTANCIAÇÃO PROCEDURAL DE INIMIGOS
         sorteiaItens = SKAction.run {
-            let sorteio = Int.random(in: 0..<20)
-            
-            if(sorteio < 5) {
-                self.criaInimigoA()
-            } else if(sorteio >= 5 && sorteio < 10) {
-                self.criaInimigoB()
-            } else if (sorteio > 17) {
-                self.criarPeninha()
+            if(comecou && !acabou) {
+                let sorteio = Int.random(in: 0..<20)
+                
+                if(sorteio < 5) {
+                    self.criaInimigoA()
+                } else if(sorteio >= 5 && sorteio < 10) {
+                    self.criaInimigoB()
+                } else if (sorteio > 17) {
+                    self.criarPeninha()
+                }
+
             }
+                
         }
         
         
@@ -121,8 +135,9 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
         lesmo.physicsBody?.allowsRotation = false
         
         lesmo.physicsBody?.categoryBitMask = idInimigo
-        
+                
         lesmo.run(SKAction.sequence([acaoMove, acaoRemove]))
+        
         self.addChild(lesmo)
     }
     
@@ -138,8 +153,13 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
         bugado.physicsBody?.allowsRotation = false
         
         bugado.physicsBody?.categoryBitMask = idInimigo
+        
+        inimigos.append(bugado)
 
-        bugado.run(SKAction.sequence([acaoMove, acaoRemove]))
+        bugado.run(SKAction.sequence([acaoMove, acaoRemove, SKAction.run {
+            self.inimigos.remove(at: 0)
+        }]))
+        
         self.addChild(bugado)
     }
     
@@ -155,7 +175,7 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
         peninha.physicsBody?.allowsRotation = false
         
         peninha.physicsBody?.categoryBitMask = idItem
-        
+                
         peninha.run(SKAction.sequence([acaoMove, acaoRemove]))
         self.addChild(peninha)
     }
@@ -178,7 +198,7 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
                                                 
                 textoGame.isHidden = true
                 objetoDummy.speed = 1
-                self.run(SKAction.repeatForever(SKAction.sequence([sorteiaItens, SKAction.wait(forDuration: 3.0)])))
+                self.run(SKAction.repeatForever(SKAction.sequence([sorteiaItens, SKAction.wait(forDuration: 1.5)])))
             }
             
             
@@ -199,6 +219,7 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
                 objetoDummy.speed = 1
                 pontos = 0
                 textoPontos.text = "Score: \(pontos)"
+                SKAudio.sharedInstance().backgroundMusicPlayer?.volume = 0.5
             }
         }
     }
@@ -210,6 +231,11 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
     }
     
     override func update(_ currentTime: TimeInterval) {
+        
+        //percorre toda a lista de inimigos e atualiza a senoide deles.
+        for e in inimigos {
+            e.atualizaSenoide()
+        }
         
         if(!acabou && comecou) {
             if(felpudo.position.y < (felpudo.size.height / 2 + 10)) {
@@ -231,10 +257,25 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
         objetoDummy.speed = 0
         textoGame.isHidden = false
         textoGame.text = "Fim de jogo!"
+        self.run(somHit)
+        
+        SKAudio.sharedInstance().backgroundMusicPlayer?.volume = 0.1
         
         self.run(SKAction.sequence([SKAction.wait(forDuration: 1.0), SKAction.run {
             self.textoGame.text = "Toque para Reiniciar"
             podeReiniciar = true
+            
+            let children = self.children
+            for child in children {
+                if(child.name != nil) {
+                    if(child.name! == "Item" || child.name! == "Inimigo") { //pq tá tendo !? n precisamos de desempacotar nd aq
+                        
+                        self.criaExplosao(child.position)
+                        child.removeFromParent()
+                    }
+                }
+            }
+            
         }]))
     }
     
@@ -244,11 +285,54 @@ class MinhaCena: SKScene, SKPhysicsContactDelegate {
         }
         
         if(contact.bodyA.node?.name == "Item") {
+            
+            let px = CGFloat(contact.bodyA.node?.position.x ?? 0)
+            let py = CGFloat(contact.bodyB.node?.position.y ?? 0)
+            
             contact.bodyA.node?.removeFromParent()
+            
+            criaParticulasPenas(CGPoint(x: px, y: py))
+
             pontos += 1
             textoPontos.text = "Score: \(pontos)"
+            self.run(somPick)
         }
 
+    }
+    
+    func criaParticulasPenas(_ pos: CGPoint) {
+        let peninha:SKTexture = SKTexture(imageNamed: "estrela")
+        let minhaParticula:SKEmitterNode = SKEmitterNode()
+        minhaParticula.particleTexture = peninha
+        minhaParticula.position = pos //posição das partículas
+        minhaParticula.particleSize = CGSize(width: 8, height: 8)
+        minhaParticula.particleBirthRate = 25
+        minhaParticula.numParticlesToEmit = 10 // múmero de partículas emitidas
+        minhaParticula.particleLifetime = 0.5 //tempo de vida da partícula
+        minhaParticula.particleTexture?.filteringMode = .nearest
+        minhaParticula.xAcceleration = 0
+        minhaParticula.yAcceleration = 0
+        minhaParticula.particleSpeed = 200
+        minhaParticula.particleSpeedRange = 100
+        minhaParticula.particleRotationSpeed = -3
+        minhaParticula.particleRotationRange = 3
+        minhaParticula.emissionAngle = CGFloat(Double.pi * 2)
+        minhaParticula.emissionAngleRange = CGFloat(Double.pi * 2)
+        minhaParticula.particleColorAlphaSpeed = 0.1
+        minhaParticula.particleColorAlphaRange = 1
+        minhaParticula.particleAlphaSequence = SKKeyframeSequence(keyframeValues: [1,0], times: [0,1])
+        minhaParticula.particleScaleSequence = SKKeyframeSequence(keyframeValues: [3, 0.5], times: [0,1])
+        self.addChild(minhaParticula)
+        minhaParticula.run(SKAction.move(by: CGVector(dx: -10, dy: 5), duration: 1.0))
+        minhaParticula.run(SKAction.sequence([SKAction.wait(forDuration: 2), SKAction.removeFromParent()]))
+    }
+    
+    func criaExplosao(_ pos: CGPoint) {
+        let explosao = ObjetoAnimado("explosao")
+        explosao.position = CGPoint(x: pos.x, y: pos.y)
+        explosao.run(SKAction.move(by: CGVector(dx: -10, dy: 5), duration: 1.0))
+        explosao.run(SKAction.sequence([SKAction.fadeOut(withDuration: 1.0), SKAction.removeFromParent()]))
+        self.addChild(explosao)
     }
     
 }

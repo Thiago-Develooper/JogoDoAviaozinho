@@ -11,6 +11,7 @@ import SpriteKit
 class ObjetoAnimado: SKSpriteNode {
     
     var nome:String?
+    var sinOffSet = CGFloat(Float.random(in: 0..<360.0))
     
     init(_ nome: String) {
         
@@ -37,5 +38,10 @@ class ObjetoAnimado: SKSpriteNode {
         let animacao:SKAction = SKAction.animate(with: imagens, timePerFrame: 0.1, resize: true, restore: true)
 
         self.run(SKAction.repeatForever(animacao))
+    }
+    
+    public func atualizaSenoide() {
+        let py = CGFloat((sin(self.position.x * 0.01) * 100) + 50 + sinOffSet) //sinOffSet é uma variável que sorteia um num de 0 a 360.
+        self.position = CGPoint(x: self.position.x, y: py)
     }
 }

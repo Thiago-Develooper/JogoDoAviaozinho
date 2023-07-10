@@ -26,6 +26,7 @@
 		AF40FCF02A545EB60015D7A8 /* MinhaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF40FCEF2A545EB60015D7A8 /* MinhaViewController.swift */; };
 		AF40FCF22A54647D0015D7A8 /* MinhaCena.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF40FCF12A54647D0015D7A8 /* MinhaCena.swift */; };
 		AF40FCF42A54CE130015D7A8 /* ObjetoAnimado.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF40FCF32A54CE130015D7A8 /* ObjetoAnimado.swift */; };
+		AF40FD102A5C86D30015D7A8 /* SKAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF40FD0F2A5C86D30015D7A8 /* SKAudio.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +50,7 @@
 		AF40FCEF2A545EB60015D7A8 /* MinhaViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinhaViewController.swift; sourceTree = "<group>"; };
 		AF40FCF12A54647D0015D7A8 /* MinhaCena.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinhaCena.swift; sourceTree = "<group>"; };
 		AF40FCF32A54CE130015D7A8 /* ObjetoAnimado.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjetoAnimado.swift; sourceTree = "<group>"; };
+		AF40FD0F2A5C86D30015D7A8 /* SKAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKAudio.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,7 @@
 			children = (
 				AF40FCE92A545E080015D7A8 /* Graficos e Assets */,
 				AF40FCB62A545AFE0015D7A8 /* AppDelegate.swift */,
+				AF40FD0F2A5C86D30015D7A8 /* SKAudio.swift */,
 				AF40FCEF2A545EB60015D7A8 /* MinhaViewController.swift */,
 				AF40FCF12A54647D0015D7A8 /* MinhaCena.swift */,
 				AF40FCF32A54CE130015D7A8 /* ObjetoAnimado.swift */,
@@ -197,6 +200,7 @@
 			files = (
 				AF40FCF02A545EB60015D7A8 /* MinhaViewController.swift in Sources */,
 				AF40FCF22A54647D0015D7A8 /* MinhaCena.swift in Sources */,
+				AF40FD102A5C86D30015D7A8 /* SKAudio.swift in Sources */,
 				AF40FCF42A54CE130015D7A8 /* ObjetoAnimado.swift in Sources */,
 				AF40FCB72A545AFE0015D7A8 /* AppDelegate.swift in Sources */,
 			);
